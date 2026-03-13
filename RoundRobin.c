@@ -7,6 +7,7 @@
 #include <time.h> 
 #include <signal.h>
 #include <sys/time.h>
+#include <linux/time.h>
 
 /************************************************************************************************ 
 		These DEFINE statements represent the workload size of each task and 
@@ -78,7 +79,7 @@ int main(int argc, char const *argv[])
 	if (pid3 == 0){
 
 		myfunction(WORKLOAD3);
-
+ 
 		exit(0);
 	}
 	kill(pid3, SIGSTOP);
@@ -105,30 +106,66 @@ int main(int argc, char const *argv[])
 		- For the assignment purposes, you have to replace this part with the other scheduling methods 
 		to be implemented.
 	************************************************************************************************/
+    //Clock
+    struct timespec ready, arrival1, arrival2, arrival3, arrival4;
+    double response_time1, response_time2, response_time3, response_time4;
+    int started1 = 0, started2 = 0, started3 = 0, started4 = 0;
 
 	running1 = 1;
 	running2 = 1;
 	running3 = 1;
 	running4 = 1;
 
+    clock_gettime(CLOCK_MONOTONIC, &ready);          // Start Clock
+
 	while (running1 > 0 || running2 > 0 || running3 > 0 || running4 > 0)
+    
 	{
 		if (running1 > 0){
+            if (started1 == 0){
+                clock_gettime(CLOCK_MONOTONIC, &arrival1);    // Arrival Time
+                response_time1 = (arrival1.tv_sec - ready.tv_sec) + ((arrival1.tv_nsec - ready.tv_nsec) / 1e9);
+                printf("Response Time for Task 1: %.10f seconds\n", response_time1);
+                started1 = 1;
+
+            }
+            
 			kill(pid1, SIGCONT);
 			usleep(QUANTUM1);
 			kill(pid1, SIGSTOP);
 		}
 		if (running2 > 0){
+            if (started2 == 0){
+                clock_gettime(CLOCK_MONOTONIC, &arrival2);    // Arrival Time
+                response_time2 = (arrival2.tv_sec - ready.tv_sec) + ((arrival2.tv_nsec - ready.tv_nsec) / 1e9);
+                printf("Response Time for Task 2: %.10f seconds\n", response_time2);
+                started2 = 1;
+
+            }
 			kill(pid2, SIGCONT);
 			usleep(QUANTUM2);
 			kill(pid2, SIGSTOP);
 		}
 		if (running3 > 0){
+            if (started3 == 0){
+                clock_gettime(CLOCK_MONOTONIC, &arrival3);    // Arrival Time
+                response_time3 = (arrival3.tv_sec - ready.tv_sec) + ((arrival3.tv_nsec - ready.tv_nsec) / 1e9);
+                printf("Response Time for Task 3: %.10f seconds\n", response_time3);
+                started3 = 1;
+
+            }
 			kill(pid3, SIGCONT);
 			usleep(QUANTUM3);
 			kill(pid3, SIGSTOP);
 		}
 		if (running4 > 0){
+            if (started4 == 0){
+                clock_gettime(CLOCK_MONOTONIC, &arrival4);    // Arrival Time
+                response_time4 = (arrival4.tv_sec - ready.tv_sec) + ((arrival4.tv_nsec - ready.tv_nsec) / 1e9);
+                printf("Response Time for Task 4: %.10f seconds\n", response_time4);
+                started4 = 1;
+
+            }
 			kill(pid4, SIGCONT);
 			usleep(QUANTUM4);
 			kill(pid4, SIGSTOP);
@@ -138,7 +175,7 @@ int main(int argc, char const *argv[])
 		waitpid(pid3, &running3, WNOHANG);
 		waitpid(pid4, &running4, WNOHANG);
 	}
-
+    printf("All tasks completed.\n");
 	/************************************************************************************************
 		- Scheduling code ends here
 	************************************************************************************************/
