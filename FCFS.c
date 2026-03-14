@@ -74,7 +74,7 @@ int main(int argc, char const *argv[])
     struct timespec ready, completion_time[4];
     double response_time[4], average_response_time;
 
-    clock_gettime(CLOCK_MONOTONIC, &ready); // completion_time Clock
+    clock_gettime(CLOCK_MONOTONIC, &ready); // Arrival Clock
 
     for(int i=0; i < 4; i++){
         kill(pid[i], SIGCONT);
