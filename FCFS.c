@@ -72,7 +72,7 @@ int main(int argc, char const *argv[])
 
 	//Clock
     struct timespec ready, arrival[4];
-    double response_time[4];
+    double response_time[4], average_response_time;
 
     clock_gettime(CLOCK_MONOTONIC, &ready);
 
@@ -84,6 +84,8 @@ int main(int argc, char const *argv[])
         kill(pid[i], SIGCONT);
         waitpid(pid[i], NULL, 0);
     }
+    average_response_time = (response_time[0] + response_time[1] + response_time[2] + response_time[3]) / 4;
+    printf("Average Response Time: %.10f seconds\n", average_response_time);
     printf("All tasks completed.\n");
 	/************************************************************************************************
 		- Scheduling code ends here

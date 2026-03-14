@@ -108,7 +108,7 @@ int main(int argc, char const *argv[])
 	************************************************************************************************/
     //Clock
     struct timespec ready, arrival1, arrival2, arrival3, arrival4;
-    double response_time1, response_time2, response_time3, response_time4;
+    double response_time1, response_time2, response_time3, response_time4, average_response_time;
     int started1 = 0, started2 = 0, started3 = 0, started4 = 0;
 
 	running1 = 1;
@@ -175,6 +175,8 @@ int main(int argc, char const *argv[])
 		waitpid(pid3, &running3, WNOHANG);
 		waitpid(pid4, &running4, WNOHANG);
 	}
+	average_response_time = (response_time1 + response_time2 + response_time3 + response_time4) / 4;
+	printf("Average Response Time: %.10f seconds\n", average_response_time);
     printf("All tasks completed.\n");
 	/************************************************************************************************
 		- Scheduling code ends here
