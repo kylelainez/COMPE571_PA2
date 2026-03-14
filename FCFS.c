@@ -71,18 +71,18 @@ int main(int argc, char const *argv[])
 	************************************************************************************************/
 
 	//Clock
-    struct timespec ready, arrival[4];
+    struct timespec ready, completion_time[4];
     double response_time[4], average_response_time;
 
-    clock_gettime(CLOCK_MONOTONIC, &ready);
+    clock_gettime(CLOCK_MONOTONIC, &ready); // completion_time Clock
 
     for(int i=0; i < 4; i++){
-        clock_gettime(CLOCK_MONOTONIC, &arrival[i]);    // Arrival Time
-        response_time[i] = (arrival[i].tv_sec - ready.tv_sec) + ((arrival[i].tv_nsec - ready.tv_nsec) / 1e9);
-        printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
-
         kill(pid[i], SIGCONT);
         waitpid(pid[i], NULL, 0);
+
+		clock_gettime(CLOCK_MONOTONIC, &completion_time[i]);    // Completion Time
+        response_time[i] = (completion_time[i].tv_sec - ready.tv_sec) + ((completion_time[i].tv_nsec - ready.tv_nsec) / 1e9);
+        printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
     }
     average_response_time = (response_time[0] + response_time[1] + response_time[2] + response_time[3]) / 4;
     printf("Average Response Time: %.10f seconds\n", average_response_time);
