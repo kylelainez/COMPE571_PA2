@@ -16,10 +16,9 @@
 #define WORKLOAD3 25000
 #define WORKLOAD4 10000
 
-#define QUANTUM   1000
-//#define QUANTUM   10000
-//#define QUANTUM   25000
-//#define QUANTUM 50000
+// #define QUANTUM   100
+#define QUANTUM   500
+
 
 pid_t status[4] = {0}; // Initially all the pids are runnable, once they finish set to 0 
 
@@ -107,7 +106,7 @@ int main(int argc, char const *argv[])
         if(status[i] == 0) {
 		    clock_gettime(CLOCK_MONOTONIC, &completion_time[i]);    // Completion Time
             response_time[i] = (completion_time[i].tv_sec - ready.tv_sec) + ((completion_time[i].tv_nsec - ready.tv_nsec) / 1e9);
-            printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
+            // printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
         }
     }
 
@@ -121,15 +120,16 @@ int main(int argc, char const *argv[])
 
             clock_gettime(CLOCK_MONOTONIC, &completion_time[i]);    // Completion Time
             response_time[i] = (completion_time[i].tv_sec - ready.tv_sec) + ((completion_time[i].tv_nsec - ready.tv_nsec) / 1e9);
-            printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
+            // printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
         }
     }
 
 
 
     average_response_time = (response_time[0] + response_time[1] + response_time[2] + response_time[3]) / 4;
-    printf("Average Response Time: %.10f seconds\n", average_response_time);
-    printf("All tasks completed.\n");
+    // printf("Average Response Time: %.10f seconds\n", average_response_time);
+    // printf("All tasks completed.\n");
+    printf("%.10f\n", average_response_time);
 	/************************************************************************************************
 		- Scheduling code ends here
 	************************************************************************************************/
