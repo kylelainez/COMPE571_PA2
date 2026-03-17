@@ -6,8 +6,6 @@
 #include <string.h> 
 #include <time.h> 
 #include <signal.h>
-#include <sys/time.h>
-#include <linux/time.h>
 
 /************************************************************************************************ 
 		These DEFINE statements represent the workload size of each task and 
@@ -19,6 +17,7 @@
 #define WORKLOAD3 25000
 #define WORKLOAD4 10000
 
+#define QUANTUM  150000
 #define QUANTUM1 1000
 #define QUANTUM2 1000
 #define QUANTUM3 1000
@@ -123,56 +122,57 @@ int main(int argc, char const *argv[])
 	{
 		if (running1 > 0){
 			kill(pid1, SIGCONT);
-			usleep(QUANTUM1);
+			usleep(QUANTUM);
 			kill(pid1, SIGSTOP);
 		}
 		if (running2 > 0){
 			kill(pid2, SIGCONT);
-			usleep(QUANTUM2);
+			usleep(QUANTUM);
 			kill(pid2, SIGSTOP);
 		}
 		if (running3 > 0){
 			kill(pid3, SIGCONT);
-			usleep(QUANTUM3);
+			usleep(QUANTUM);
 			kill(pid3, SIGSTOP);
 		}
 		if (running4 > 0){
 			kill(pid4, SIGCONT);
-			usleep(QUANTUM4);
+			usleep(QUANTUM);
 			kill(pid4, SIGSTOP);
 		}
 		waitpid(pid1, &running1, WNOHANG);
 		if(running1 == 0 && finished1 == 0){
 			clock_gettime(CLOCK_MONOTONIC, &completion_time1);  
 			response_time1 = (completion_time1.tv_sec - ready.tv_sec) + ((completion_time1.tv_nsec - ready.tv_nsec) / 1e9);
-			printf("Response Time for Task 1: %.10f seconds\n", response_time1);
+			// printf("Response Time for Task 1: %.10f seconds\n", response_time1);
 			finished1 = 1;
 		}
 		waitpid(pid2, &running2, WNOHANG);
 		if(running2 == 0 && finished2 == 0){
 			clock_gettime(CLOCK_MONOTONIC, &completion_time2);  
 			response_time2 = (completion_time2.tv_sec - ready.tv_sec) + ((completion_time2.tv_nsec - ready.tv_nsec) / 1e9);
-			printf("Response Time for Task 2: %.10f seconds\n", response_time2);
+			// printf("Response Time for Task 2: %.10f seconds\n", response_time2);
 			finished2 = 1;
 		}
 		waitpid(pid3, &running3, WNOHANG);
 		if(running3 == 0 && finished3 == 0){
 			clock_gettime(CLOCK_MONOTONIC, &completion_time3); 
 			response_time3 = (completion_time3.tv_sec - ready.tv_sec) + ((completion_time3.tv_nsec - ready.tv_nsec) / 1e9);
-			printf("Response Time for Task 3: %.10f seconds\n", response_time3);
+			// printf("Response Time for Task 3: %.10f seconds\n", response_time3);
 			finished3 = 1;
 		}
 		waitpid(pid4, &running4, WNOHANG);
 		if(running4 == 0 && finished4 == 0){
 			clock_gettime(CLOCK_MONOTONIC, &completion_time4);  
 			response_time4 = (completion_time4.tv_sec - ready.tv_sec) + ((completion_time4.tv_nsec - ready.tv_nsec) / 1e9);
-			printf("Response Time for Task 4: %.10f seconds\n", response_time4);
+			// printf("Response Time for Task 4: %.10f seconds\n", response_time4);
 			finished4 = 1;
 		}
 	}
 	average_response_time = (response_time1 + response_time2 + response_time3 + response_time4) / 4;
-	printf("Average Response Time: %.10f seconds\n", average_response_time);
-    printf("All tasks completed.\n");
+	// printf("Average Response Time: %.10f seconds\n", average_response_time);
+    // printf("All tasks completed.\n");
+	printf("%.10f\n", average_response_time);
 	/************************************************************************************************
 		- Scheduling code ends here
 	************************************************************************************************/
