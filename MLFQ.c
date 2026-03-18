@@ -7,6 +7,7 @@
 #include <time.h> 
 #include <signal.h>
 #include <stdbool.h>
+#include <linux/time.h>
 /************************************************************************************************ 
 		These DEFINE statements represent the workload size of each task
 *************************************************************************************************/
@@ -57,8 +58,12 @@ void handle_sigchld(int sig) {
 
 }
 /************************************************************************************************/
+void do_nothing(int sig) {
+}
+
 int main(int argc, char const *argv[])
 {
+    signal(SIGCHLD, do_nothing); // Interrupts usleep when Quantum > Workload
 	pid_t pid[4];
 
 	for(int i = 0; i < 4; i++){
