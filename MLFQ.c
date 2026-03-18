@@ -58,12 +58,8 @@ void handle_sigchld(int sig) {
 
 }
 /************************************************************************************************/
-void do_nothing(int sig) {
-}
-
 int main(int argc, char const *argv[])
 {
-    signal(SIGCHLD, do_nothing); // Interrupts usleep when Quantum > Workload
 	pid_t pid[4];
 
 	for(int i = 0; i < 4; i++){
@@ -95,15 +91,19 @@ int main(int argc, char const *argv[])
 	************************************************************************************************/
 
 	//Clock
-    struct timespec ready, completion_time[4];
-    double response_time[4], average_response_time;
+    struct timespec ready, completion_time[4], overhead_start, overhead_end;
+    double response_time[4], average_response_time, total_overhead = 0;
+    int context_switches = 0;
 
     clock_gettime(CLOCK_MONOTONIC, &ready); // Arrival Clock
-
+    clock_gettime(CLOCK_MONOTONIC, &overhead_start);  
 
     // MLFQ 
     // Queue 1 Using RR
     for(int i=0; i < 4; i++){
+        clock_gettime(CLOCK_MONOTONIC, &overhead_end);  
+        total_overhead += (overhead_end.tv_sec - overhead_start.tv_sec) + ((overhead_end.tv_nsec - overhead_start.tv_nsec) / 1e9);
+        context_switches++;
         kill(pid[i], SIGCONT);
         usleep(QUANTUM);  // Need SIGCHILD handler for QUANTUM > Workloads
         kill(pid[i], SIGSTOP);
@@ -113,12 +113,16 @@ int main(int argc, char const *argv[])
             response_time[i] = (completion_time[i].tv_sec - ready.tv_sec) + ((completion_time[i].tv_nsec - ready.tv_nsec) / 1e9);
             // printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
         }
+        clock_gettime(CLOCK_MONOTONIC, &overhead_start);
     }
 
 
     // Queue 2 Using FCFS
     for(int i = 0; i < 4; i ++)
     {
+        clock_gettime(CLOCK_MONOTONIC, &overhead_end);  
+        total_overhead += (overhead_end.tv_sec - overhead_start.tv_sec) + ((overhead_end.tv_nsec - overhead_start.tv_nsec) / 1e9);
+        context_switches++;
         if(status[i] != 0){
             kill(pid[i], SIGCONT);
             waitpid(pid[i], NULL, 0);
@@ -127,10 +131,10 @@ int main(int argc, char const *argv[])
             response_time[i] = (completion_time[i].tv_sec - ready.tv_sec) + ((completion_time[i].tv_nsec - ready.tv_nsec) / 1e9);
             // printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
         }
+        clock_gettime(CLOCK_MONOTONIC, &overhead_start);
     }
-
-
-
+    printf("Total Context Switches: %d\n", context_switches);
+	printf("Total Overhead Time: %.10f seconds\n", total_overhead);
     average_response_time = (response_time[0] + response_time[1] + response_time[2] + response_time[3]) / 4;
     // printf("Average Response Time: %.10f seconds\n", average_response_time);
     // printf("All tasks completed.\n");

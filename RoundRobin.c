@@ -18,11 +18,11 @@
 #define WORKLOAD3 25000
 #define WORKLOAD4 10000
 
-#define QUANTUM  15000000
-#define QUANTUM1 1000
-#define QUANTUM2 1000
-#define QUANTUM3 1000
-#define QUANTUM4 1000
+#define QUANTUM  1000
+#define QUANTUM1 100000
+#define QUANTUM2 100000
+#define QUANTUM3 100000
+#define QUANTUM4 100000
 
 /************************************************************************************************ 
 					DO NOT CHANGE THE FUNCTION IMPLEMENTATION
@@ -48,12 +48,8 @@ void myfunction(int param){
 	}
 }
 /************************************************************************************************/
-void do_nothing(int sig) {
-	//nothing
-}
 int main(int argc, char const *argv[])
 {
-	signal(SIGCHLD, do_nothing); // Interrupts usleep when Quantum > Workload
 	pid_t pid1, pid2, pid3, pid4;
 	int running1, running2, running3, running4;
 
@@ -110,9 +106,9 @@ int main(int argc, char const *argv[])
 		to be implemented.
 	************************************************************************************************/
     //Clock
-    struct timespec ready, completion_time1, completion_time2, completion_time3, completion_time4;
-    double response_time1 = 0, response_time2 = 0, response_time3 = 0, response_time4 = 0, average_response_time;
-	int finished1 = 0, finished2 = 0, finished3 = 0, finished4 = 0;
+    struct timespec ready, completion_time1, completion_time2, completion_time3, completion_time4, overhead_start, overhead_end;
+    double response_time1 = 0, response_time2 = 0, response_time3 = 0, response_time4 = 0, average_response_time, total_overhead = 0;
+	int finished1 = 0, finished2 = 0, finished3 = 0, finished4 = 0, context_switches = 0;
 
 	running1 = 1;
 	running2 = 1;
@@ -120,29 +116,45 @@ int main(int argc, char const *argv[])
 	running4 = 1;
 
     clock_gettime(CLOCK_MONOTONIC, &ready);          // Ready Clock
-
+	clock_gettime(CLOCK_MONOTONIC, &overhead_start);  
 	while (running1 > 0 || running2 > 0 || running3 > 0 || running4 > 0)
     
 	{
 		if (running1 > 0){
+			clock_gettime(CLOCK_MONOTONIC, &overhead_end);  
+			total_overhead += (overhead_end.tv_sec - overhead_start.tv_sec) + ((overhead_end.tv_nsec - overhead_start.tv_nsec) / 1e9);
+			context_switches++;
 			kill(pid1, SIGCONT);
 			usleep(QUANTUM);
 			kill(pid1, SIGSTOP);
+			clock_gettime(CLOCK_MONOTONIC, &overhead_start);  
 		}
 		if (running2 > 0){
+			clock_gettime(CLOCK_MONOTONIC, &overhead_end);  
+			total_overhead += (overhead_end.tv_sec - overhead_start.tv_sec) + ((overhead_end.tv_nsec - overhead_start.tv_nsec) / 1e9);
+			context_switches++;
 			kill(pid2, SIGCONT);
 			usleep(QUANTUM);
 			kill(pid2, SIGSTOP);
+			clock_gettime(CLOCK_MONOTONIC, &overhead_start);  
 		}
 		if (running3 > 0){
+			clock_gettime(CLOCK_MONOTONIC, &overhead_end);  
+			total_overhead += (overhead_end.tv_sec - overhead_start.tv_sec) + ((overhead_end.tv_nsec - overhead_start.tv_nsec) / 1e9);
+			context_switches++;
 			kill(pid3, SIGCONT);
 			usleep(QUANTUM);
 			kill(pid3, SIGSTOP);
+			clock_gettime(CLOCK_MONOTONIC, &overhead_start);
 		}
 		if (running4 > 0){
+			clock_gettime(CLOCK_MONOTONIC, &overhead_end);  
+			total_overhead += (overhead_end.tv_sec - overhead_start.tv_sec) + ((overhead_end.tv_nsec - overhead_start.tv_nsec) / 1e9);
+			context_switches++;
 			kill(pid4, SIGCONT);
 			usleep(QUANTUM);
 			kill(pid4, SIGSTOP);
+			clock_gettime(CLOCK_MONOTONIC, &overhead_start);
 		}
 		waitpid(pid1, &running1, WNOHANG);
 		if(running1 == 0 && finished1 == 0){
@@ -173,6 +185,8 @@ int main(int argc, char const *argv[])
 			finished4 = 1;
 		}
 	}
+	printf("Total Context Switches: %d\n", context_switches);
+	printf("Total Overhead Time: %.10f seconds\n", total_overhead);
 	average_response_time = (response_time1 + response_time2 + response_time3 + response_time4) / 4;
 	// printf("Average Response Time: %.10f seconds\n", average_response_time);
     // printf("All tasks completed.\n");
