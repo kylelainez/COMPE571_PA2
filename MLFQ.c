@@ -105,13 +105,13 @@ int main(int argc, char const *argv[])
         total_overhead += (overhead_end.tv_sec - overhead_start.tv_sec) + ((overhead_end.tv_nsec - overhead_start.tv_nsec) / 1e9);
         context_switches++;
         kill(pid[i], SIGCONT);
-        usleep(QUANTUM);  // Need SIGCHILD handler for QUANTUM > Workloads
+        usleep(QUANTUM);  
         kill(pid[i], SIGSTOP);
 
         if(status[i] == 0) {
 		    clock_gettime(CLOCK_MONOTONIC, &completion_time[i]);    // Completion Time
             response_time[i] = (completion_time[i].tv_sec - ready.tv_sec) + ((completion_time[i].tv_nsec - ready.tv_nsec) / 1e9);
-            // printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
+            printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
         }
         clock_gettime(CLOCK_MONOTONIC, &overhead_start);
     }
@@ -129,16 +129,15 @@ int main(int argc, char const *argv[])
 
             clock_gettime(CLOCK_MONOTONIC, &completion_time[i]);    // Completion Time
             response_time[i] = (completion_time[i].tv_sec - ready.tv_sec) + ((completion_time[i].tv_nsec - ready.tv_nsec) / 1e9);
-            // printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
+            printf("Response Time for Task %d: %.10f seconds\n", i+1, response_time[i]);
         }
         clock_gettime(CLOCK_MONOTONIC, &overhead_start);
     }
     printf("Total Context Switches: %d\n", context_switches);
 	printf("Total Overhead Time: %.10f seconds\n", total_overhead);
     average_response_time = (response_time[0] + response_time[1] + response_time[2] + response_time[3]) / 4;
-    // printf("Average Response Time: %.10f seconds\n", average_response_time);
-    // printf("All tasks completed.\n");
-    printf("%.10f\n", average_response_time);
+    printf("Average Response Time: %.10f seconds\n", average_response_time);
+    printf("All tasks completed.\n");
 	/************************************************************************************************
 		- Scheduling code ends here
 	************************************************************************************************/
